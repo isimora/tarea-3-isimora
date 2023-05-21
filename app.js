@@ -32,18 +32,20 @@ app.post("/transactions", async (req, res) => {
   console.log("Decoded Data:", decodedData);
 
   // Extract the information from the message
+  const publishTime = req.body.message.publishTime;
   const operationType = decodedData.substr(0, 4);
   const messageId = decodedData.substr(4, 10);
-  const sourceBank = decodedData.substr(14, 7).replace(/^0+/, '');
-  const sourceAccount = decodedData.substr(21, 10).replace(/^0+/, '');
+  const originBank = decodedData.substr(14, 7).replace(/^0+/, '');
+  const originAccount = decodedData.substr(21, 10).replace(/^0+/, '');
   const destinationBank = decodedData.substr(31, 7).replace(/^0+/, '');
   const destinationAccount = decodedData.substr(38, 10).replace(/^0+/, '');
   const amount = decodedData.substr(48, 16).replace(/^0+/, '');
 
+  console.log("Tiempo de publicación:", publishTime)
   console.log("Tipo de operación:", operationType);
   console.log("Id de mensaje:", messageId);
-  console.log("Banco de origen:", sourceBank);
-  console.log("Cuenta origen:", sourceAccount);
+  console.log("Banco de origen:", originBank);
+  console.log("Cuenta origen:", originAccount);
   console.log("Banco de destino:", destinationBank);
   console.log("Cuenta destino:", destinationAccount);
   console.log("Monto:", amount);
@@ -51,16 +53,17 @@ app.post("/transactions", async (req, res) => {
   // Insert the transaction into the table
   try {
     const query = `
-      INSERT INTO transactions (operation_type, message_id, source_bank, source_account, destination_bank, destination_account, amount)
-      VALUES ($1, $2, $3, $4, $5, $6, $7)
+      INSERT INTO transactions (publish_time, operation_type, message_id, origin_bank, origin_account, destination_bank, destination_account, amount)
+      VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
       RETURNING id;
     `;
 
     const values = [
+      publishTime,
       operationType,
       messageId,
-      sourceBank,
-      sourceAccount,
+      originBank,
+      originAccount,
       destinationBank,
       destinationAccount,
       amount,
